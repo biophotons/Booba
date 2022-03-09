@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicensed
 //
-// SAFUU PROTOCOL COPYRIGHT (C) 2022 
+// BOOBA PROTOCOL COPYRIGHT (C) 2022 
 
 pragma solidity ^0.7.4;
 
@@ -394,16 +394,16 @@ abstract contract ERC20Detailed is IERC20 {
     }
 }
 
-contract Safuu is ERC20Detailed, Ownable {
+contract Booba is ERC20Detailed, Ownable {
 
     using SafeMath for uint256;
     using SafeMathInt for int256;
 
     event LogRebase(uint256 indexed epoch, uint256 totalSupply);
 
-    string public _name = "Safuu";
-    string public _symbol = "SAFUU";
-    uint8 public _decimals = 5;
+    string public _name = "Booba";
+    string public _symbol = "BOOBA";
+    uint8 public _decimals = 18;
 
     IPancakeSwapPair public pairContract;
     mapping(address => bool) _isFeeExempt;
@@ -413,30 +413,30 @@ contract Safuu is ERC20Detailed, Ownable {
         _;
     }
 
-    uint256 public constant DECIMALS = 5;
+    uint256 public constant DECIMALS = 18;
     uint256 public constant MAX_UINT256 = ~uint256(0);
-    uint8 public constant RATE_DECIMALS = 7;
+    uint8 public constant RATE_DECIMALS = 18;
 
     uint256 private constant INITIAL_FRAGMENTS_SUPPLY =
         325 * 10**3 * 10**DECIMALS;
 
-    uint256 public liquidityFee = 40;
-    uint256 public treasuryFee = 25;
-    uint256 public safuuInsuranceFundFee = 50;
-    uint256 public sellFee = 20;
-    uint256 public firePitFee = 25;
+    uint256 public liquidityFee = 690;
+    uint256 public treasuryFee = 69;
+    uint256 public boobaInsuranceFundFee = 69;
+    uint256 public sellFee = 690;
+    uint256 public firePitFee = 690;
     uint256 public totalFee =
-        liquidityFee.add(treasuryFee).add(safuuInsuranceFundFee).add(
+        liquidityFee.add(treasuryFee).add(boobaInsuranceFundFee).add(
             firePitFee
         );
-    uint256 public feeDenominator = 1000;
+    uint256 public feeDenominator = 10000;
 
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
     address public autoLiquidityReceiver;
     address public treasuryReceiver;
-    address public safuuInsuranceFundReceiver;
+    address public boobaInsuranceFundReceiver;
     address public firePit;
     address public pairAddress;
     bool public swapEnabled = true;
@@ -452,7 +452,7 @@ contract Safuu is ERC20Detailed, Ownable {
     uint256 private constant TOTAL_GONS =
         MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
 
-    uint256 private constant MAX_SUPPLY = 325 * 10**7 * 10**DECIMALS;
+    uint256 private constant MAX_SUPPLY = 69000000000000000000000000000000000000000000000000000000000000000000000 * 10**7 * 10**DECIMALS;
 
     bool public _autoRebase;
     bool public _autoAddLiquidity;
@@ -466,7 +466,7 @@ contract Safuu is ERC20Detailed, Ownable {
     mapping(address => mapping(address => uint256)) private _allowedFragments;
     mapping(address => bool) public blacklist;
 
-    constructor() ERC20Detailed("Safuu", "SAFUU", uint8(DECIMALS)) Ownable() {
+    constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) Ownable() {
 
         router = IPancakeSwapRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E); 
         pair = IPancakeSwapFactory(router.factory()).createPair(
@@ -474,10 +474,10 @@ contract Safuu is ERC20Detailed, Ownable {
             address(this)
         );
       
-        autoLiquidityReceiver = 0x5562640B953b6c2f79a655E930aFa68b2a65C627;
-        treasuryReceiver = 0xa9c6d0cc785569b450393A69599E97fAED5D9dd9; 
-        safuuInsuranceFundReceiver = 0x082D0FbCA3D80b2d4A05E20bFc227523bE8EFEF3;
-        firePit = 0xaA32C984AfDfa6B95e88B8aB7faBfa65De89b98C;
+        autoLiquidityReceiver = 0x55dc4A7290Ad6ae97AA2c8ef9ff2CA44dFcB233f;
+        treasuryReceiver = 0xDde42996a258f03ADC8f8C508123743F622f4EE5; 
+        boobaInsuranceFundReceiver = 0xAB611Faded4aCD9cdd69bFE02420b7090acb3E62;
+        firePit = 0xc23a7929a3d9Ca948Cc5EeFC4594F0c12615B7f3;
 
         _allowedFragments[address(this)][address(router)] = uint256(-1);
         pairAddress = pair;
@@ -507,13 +507,13 @@ contract Safuu is ERC20Detailed, Ownable {
         uint256 epoch = times.mul(15);
 
         if (deltaTimeFromInit < (365 days)) {
-            rebaseRate = 2355;
+            rebaseRate = 4269;
         } else if (deltaTimeFromInit >= (7 * 365 days)) {
-            rebaseRate = 2;
+            rebaseRate = 4;
         } else if (deltaTimeFromInit >= ((15 * 365 days) / 10)) {
-            rebaseRate = 14;
+            rebaseRate = 25;
         } else if (deltaTimeFromInit >= (365 days)) {
-            rebaseRate = 211;
+            rebaseRate = 369;
         }
 
         for (uint256 i = 0; i < times; i++) {
@@ -626,7 +626,7 @@ contract Safuu is ERC20Detailed, Ownable {
             gonAmount.div(feeDenominator).mul(firePitFee)
         );
         _gonBalances[address(this)] = _gonBalances[address(this)].add(
-            gonAmount.div(feeDenominator).mul(_treasuryFee.add(safuuInsuranceFundFee))
+            gonAmount.div(feeDenominator).mul(_treasuryFee.add(boobaInsuranceFundFee))
         );
         _gonBalances[autoLiquidityReceiver] = _gonBalances[autoLiquidityReceiver].add(
             gonAmount.div(feeDenominator).mul(liquidityFee)
@@ -708,13 +708,13 @@ contract Safuu is ERC20Detailed, Ownable {
 
         (bool success, ) = payable(treasuryReceiver).call{
             value: amountETHToTreasuryAndSIF.mul(treasuryFee).div(
-                treasuryFee.add(safuuInsuranceFundFee)
+                treasuryFee.add(boobaInsuranceFundFee)
             ),
             gas: 30000
         }("");
-        (success, ) = payable(safuuInsuranceFundReceiver).call{
-            value: amountETHToTreasuryAndSIF.mul(safuuInsuranceFundFee).div(
-                treasuryFee.add(safuuInsuranceFundFee)
+        (success, ) = payable(boobaInsuranceFundReceiver).call{
+            value: amountETHToTreasuryAndSIF.mul(boobaInsuranceFundFee).div(
+                treasuryFee.add(boobaInsuranceFundFee)
             ),
             gas: 30000
         }("");
@@ -723,7 +723,7 @@ contract Safuu is ERC20Detailed, Ownable {
     function withdrawAllToTreasury() external swapping onlyOwner {
 
         uint256 amountToSwap = _gonBalances[address(this)].div(_gonsPerFragment);
-        require( amountToSwap > 0,"There is no Safuu token deposited in token contract");
+        require( amountToSwap > 0,"There is no Booba token deposited in token contract");
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = router.WETH();
@@ -863,12 +863,12 @@ contract Safuu is ERC20Detailed, Ownable {
     function setFeeReceivers(
         address _autoLiquidityReceiver,
         address _treasuryReceiver,
-        address _safuuInsuranceFundReceiver,
+        address _boobaInsuranceFundReceiver,
         address _firePit
     ) external onlyOwner {
         autoLiquidityReceiver = _autoLiquidityReceiver;
         treasuryReceiver = _treasuryReceiver;
-        safuuInsuranceFundReceiver = _safuuInsuranceFundReceiver;
+        boobaInsuranceFundReceiver = _boobaInsuranceFundReceiver;
         firePit = _firePit;
     }
 
