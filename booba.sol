@@ -507,13 +507,9 @@ contract Booba is ERC20Detailed, Ownable {
         uint256 epoch = times.mul(15);
 
         if (deltaTimeFromInit < (365 days)) {
-            rebaseRate = 4269;
-        } else if (deltaTimeFromInit >= (7 * 365 days)) {
-            rebaseRate = 4;
-        } else if (deltaTimeFromInit >= ((15 * 365 days) / 10)) {
-            rebaseRate = 25;
+            rebaseRate = 6900;
         } else if (deltaTimeFromInit >= (365 days)) {
-            rebaseRate = 369;
+            rebaseRate = 69;
         }
 
         for (uint256 i = 0; i < times; i++) {
