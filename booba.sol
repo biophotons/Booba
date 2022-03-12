@@ -418,7 +418,7 @@ contract Booba is ERC20Detailed, Ownable {
     uint8 public constant RATE_DECIMALS = 18;
 
     uint256 private constant INITIAL_FRAGMENTS_SUPPLY =
-        325 * 10**3 * 10**DECIMALS;
+        690;
 
     uint256 public liquidityFee = 690;
     uint256 public treasuryFee = 69;
