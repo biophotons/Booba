@@ -449,10 +449,7 @@ contract Booba is ERC20Detailed, Ownable {
         inSwap = false;
     }
 
-    uint256 private constant TOTAL_GONS =
-        MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
 
-    uint256 private constant MAX_SUPPLY = 69000000000000000000000000000000000000000000000000000000000000000000000 * 10**7 * 10**DECIMALS;
 
     bool public _autoRebase;
     bool public _autoAddLiquidity;
@@ -509,7 +506,7 @@ contract Booba is ERC20Detailed, Ownable {
         if (deltaTimeFromInit < (690 days)) {
             rebaseRate = 6900;
 	} else if (deltaTimeFromInit >= (690 days)) {
-            rebaseRate = 0.69;
+            rebaseRate = 69;
 	}
 
         for (uint256 i = 0; i < times; i++) {
