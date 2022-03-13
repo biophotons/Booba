@@ -449,7 +449,11 @@ contract Booba is ERC20Detailed, Ownable {
         inSwap = false;
     }
 
+ uint256 private constant TOTAL_GONS =
+        MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
 
+    uint256 private constant MAX_SUPPLY = 69000000000000000000000000000000000000000000000000000000000000000000000;
+  
 
     bool public _autoRebase;
     bool public _autoAddLiquidity;
