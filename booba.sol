@@ -423,7 +423,7 @@ contract Booba is ERC20Detailed, Ownable {
     uint256 public liquidityFee = 690;
     uint256 public treasuryFee = 69;
     uint256 public boobaInsuranceFundFee = 69;
-    uint256 public sellFee = 690;
+    uint256 public sellFee = 69;
     uint256 public firePitFee = 690;
     uint256 public totalFee =
         liquidityFee.add(treasuryFee).add(boobaInsuranceFundFee).add(
