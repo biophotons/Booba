@@ -323,7 +323,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     bool public swapEnabled = true;
     bool public autoRebase = false;
     bool public feesOnNormalTransfers = false;
-    bool public isLiquidityInBnb = true;
+    bool public isLiquidityIneth = true;
 
     uint256 public rewardYield = 6969696;
     uint256 public rewardYieldDenominator = 6969696969;
@@ -350,7 +350,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     address public liquidityReceiver = 0x55dc4A7290Ad6ae97AA2c8ef9ff2CA44dFcB233f;
     address public treasuryReceiver = 0xDde42996a258f03ADC8f8C508123743F622f4EE5;
     address public riskFreeValueReceiver = 0xAB611Faded4aCD9cdd69bFE02420b7090acb3E62;
-    address public busdToken = 0xc23a7929a3d9Ca948Cc5EeFC4594F0c12615B7f3;
+    address public usdToken = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 
     IDEXRouter public router;
     address public pair;
@@ -399,15 +399,15 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) {
         router = IDEXRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
         pair = IDEXFactory(router.factory()).createPair(address(this), router.WETH());
-        address pairBusd = IDEXFactory(router.factory()).createPair(address(this), busdToken);
+        address pairusd = IDEXFactory(router.factory()).createPair(address(this), usdToken);
 
         _allowedFragments[address(this)][address(router)] = uint256(-1);
         _allowedFragments[address(this)][pair] = uint256(-1);
         _allowedFragments[address(this)][address(this)] = uint256(-1);
-        _allowedFragments[address(this)][pairBusd] = uint256(-1);
+        _allowedFragments[address(this)][pairusd] = uint256(-1);
 
         setAutomatedMarketMakerPair(pair, true);
-        setAutomatedMarketMakerPair(pairBusd, true);
+        setAutomatedMarketMakerPair(pairusd, true);
 
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
         _gonBalances[msg.sender] = TOTAL_GONS;
@@ -418,9 +418,9 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         _isFeeExempt[address(this)] = true;
         _isFeeExempt[msg.sender] = true;
 
-        IERC20(busdToken).approve(address(router), uint256(-1));
-        IERC20(busdToken).approve(address(pairBusd), uint256(-1));
-        IERC20(busdToken).approve(address(this), uint256(-1));
+        IERC20(usdToken).approve(address(router), uint256(-1));
+        IERC20(usdToken).approve(address(pairusd), uint256(-1));
+        IERC20(usdToken).approve(address(this), uint256(-1));
 
         emit Transfer(address(0x0), msg.sender, _totalSupply);
     }
@@ -581,10 +581,10 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         uint256 half = contractTokenBalance.div(2);
         uint256 otherHalf = contractTokenBalance.sub(half);
 
-        if(isLiquidityInBnb){
+        if(isLiquidityIneth){
             uint256 initialBalance = address(this).balance;
 
-            _swapTokensForBNB(half, address(this));
+            _swapTokensForETH(half, address(this));
 
             uint256 newBalance = address(this).balance.sub(initialBalance);
 
@@ -592,20 +592,20 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
 
             emit SwapAndLiquify(half, newBalance, otherHalf);
         }else{
-            uint256 initialBalance = IERC20(busdToken).balanceOf(address(this));
+            uint256 initialBalance = IERC20(usdToken).balanceOf(address(this));
 
-            _swapTokensForBusd(half, address(this));
+            _swapTokensForusd(half, address(this));
 
-            uint256 newBalance = IERC20(busdToken).balanceOf(address(this)).sub(initialBalance);
+            uint256 newBalance = IERC20(usdToken).balanceOf(address(this)).sub(initialBalance);
 
-            _addLiquidityBusd(otherHalf, newBalance);
+            _addLiquidityusd(otherHalf, newBalance);
 
-            emit SwapAndLiquifyBusd(half, newBalance, otherHalf);
+            emit SwapAndLiquifyusd(half, newBalance, otherHalf);
         }
     }
 
-    function _addLiquidity(uint256 tokenAmount, uint256 bnbAmount) private {
-        router.addLiquidityETH{value: bnbAmount}(
+    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
+        router.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
             0,
@@ -614,12 +614,12 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
             block.timestamp
         );
     }
-    function _addLiquidityBusd(uint256 tokenAmount, uint256 busdAmount) private {
+    function _addLiquidityusd(uint256 tokenAmount, uint256 usdAmount) private {
         router.addLiquidity(
             address(this),
-            busdToken,
+            usdToken,
             tokenAmount,
-            busdAmount,
+            usdAmount,
             0,
             0,
             liquidityReceiver,
@@ -627,7 +627,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         );
     }
 
-    function _swapTokensForBNB(uint256 tokenAmount, address receiver) private {
+    function _swapTokensForETH(uint256 tokenAmount, address receiver) private {
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = router.WETH();
@@ -640,11 +640,11 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
             block.timestamp
         );
     }
-    function _swapTokensForBusd(uint256 tokenAmount, address receiver) private {
+    function _swapTokensForusd(uint256 tokenAmount, address receiver) private {
         address[] memory path = new address[](3);
         path[0] = address(this);
         path[1] = router.WETH();
-        path[2] = busdToken;
+        path[2] = usdToken;
 
         router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             tokenAmount,
@@ -670,11 +670,11 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         }
 
         if(amountToRFV > 0){
-            _swapTokensForBusd(amountToRFV, riskFreeValueReceiver);
+            _swapTokensForusd(amountToRFV, riskFreeValueReceiver);
         }
 
         if(amountToTreasury > 0){
-            _swapTokensForBNB(amountToTreasury, treasuryReceiver);
+            _swapTokensForETH(amountToTreasury, treasuryReceiver);
         }
 
         emit SwapBack(contractTokenBalance, amountToLiquify, amountToRFV, amountToTreasury);
@@ -878,9 +878,9 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         feesOnNormalTransfers = _enabled;
     }
 
-    function setIsLiquidityInBnb(bool _value) external onlyOwner {
-        require(isLiquidityInBnb != _value, "Not changed");
-        isLiquidityInBnb = _value;
+    function setIsLiquidityInEth(bool _value) external onlyOwner {
+        require(isLiquidityInEth != _value, "Not changed");
+        isLiquidityIneth = _value;
     }
 
     function setNextRebase(uint256 _nextRebase) external onlyOwner {
@@ -892,8 +892,8 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     }
 
     event SwapBack(uint256 contractTokenBalance,uint256 amountToLiquify,uint256 amountToRFV,uint256 amountToTreasury);
-    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiqudity);
-    event SwapAndLiquifyBusd(uint256 tokensSwapped, uint256 busdReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquifyusd(uint256 tokensSwapped, uint256 usdReceived, uint256 tokensIntoLiqudity);
     event LogRebase(uint256 indexed epoch, uint256 totalSupply);
     event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
 }
