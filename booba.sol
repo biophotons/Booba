@@ -1,8 +1,10 @@
-// SPDX-License-Identifier: Unlicensed
-//
-// BOOBA PROTOCOL COPYRIGHT (C) 2022 
+/**
+ *Submitted for verification at BscScan.com on 2022-04-30
+*/
 
-pragma solidity ^0.7.4;
+// SPDX-License-Identifier: AYAYA
+
+pragma solidity 0.7.6;
 
 library SafeMathInt {
     int256 private constant MIN_INT256 = int256(1) << 255;
@@ -38,6 +40,25 @@ library SafeMathInt {
         require(a != MIN_INT256);
         return a < 0 ? -a : a;
     }
+}
+
+interface IERC20 {
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address who) external view returns (uint256);
+
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    function transfer(address to, uint256 value) external returns (bool);
+
+    function approve(address spender, uint256 value) external returns (bool);
+
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
 }
 
 library SafeMath {
@@ -95,232 +116,125 @@ library SafeMath {
     }
 }
 
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
+interface InterfaceLP {
+    function sync() external;
+}
 
-    function balanceOf(address who) external view returns (uint256);
+library Roles {
+    struct Role {
+        mapping (address => bool) bearer;
+    }
 
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function add(Role storage role, address account) internal {
+        require(!has(role, account), "Roles: account already has role");
+        role.bearer[account] = true;
+    }
 
-    function transfer(address to, uint256 value) external returns (bool);
+    function remove(Role storage role, address account) internal {
+        require(has(role, account), "Roles: account does not have role");
+        role.bearer[account] = false;
+    }
 
-    function approve(address spender, uint256 value) external returns (bool);
+    function has(Role storage role, address account) internal view returns (bool) {
+        require(account != address(0), "Roles: account is the zero address");
+        return role.bearer[account];
+    }
+}
 
-    function transferFrom(
-        address from,
+abstract contract ERC20Detailed is IERC20 {
+    string private _name;
+    string private _symbol;
+    uint8 private _decimals;
+
+    constructor(
+        string memory _tokenName,
+        string memory _tokenSymbol,
+        uint8 _tokenDecimals
+    ) {
+        _name = _tokenName;
+        _symbol = _tokenSymbol;
+        _decimals = _tokenDecimals;
+    }
+
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+
+    function decimals() public view returns (uint8) {
+        return _decimals;
+    }
+}
+
+interface IDEXRouter {
+    function factory() external pure returns (address);
+
+    function WETH() external pure returns (address);
+
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint256 amountADesired,
+        uint256 amountBDesired,
+        uint256 amountAMin,
+        uint256 amountBMin,
         address to,
-        uint256 value
-    ) external returns (bool);
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
+        uint256 deadline
+    )
+    external
+    returns (
+        uint256 amountA,
+        uint256 amountB,
+        uint256 liquidity
     );
+
+    function addLiquidityETH(
+        address token,
+        uint256 amountTokenDesired,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        address to,
+        uint256 deadline
+    )
+    external
+    payable
+    returns (
+        uint256 amountToken,
+        uint256 amountETH,
+        uint256 liquidity
+    );
+
+    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external;
+
+    function swapExactETHForTokensSupportingFeeOnTransferTokens(
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external payable;
+
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external;
 }
 
-interface IPancakeSwapPair {
-		event Approval(address indexed owner, address indexed spender, uint value);
-		event Transfer(address indexed from, address indexed to, uint value);
-
-		function name() external pure returns (string memory);
-		function symbol() external pure returns (string memory);
-		function decimals() external pure returns (uint8);
-		function totalSupply() external view returns (uint);
-		function balanceOf(address owner) external view returns (uint);
-		function allowance(address owner, address spender) external view returns (uint);
-
-		function approve(address spender, uint value) external returns (bool);
-		function transfer(address to, uint value) external returns (bool);
-		function transferFrom(address from, address to, uint value) external returns (bool);
-
-		function DOMAIN_SEPARATOR() external view returns (bytes32);
-		function PERMIT_TYPEHASH() external pure returns (bytes32);
-		function nonces(address owner) external view returns (uint);
-
-		function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-		event Mint(address indexed sender, uint amount0, uint amount1);
-		event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-		event Swap(
-				address indexed sender,
-				uint amount0In,
-				uint amount1In,
-				uint amount0Out,
-				uint amount1Out,
-				address indexed to
-		);
-		event Sync(uint112 reserve0, uint112 reserve1);
-
-		function MINIMUM_LIQUIDITY() external pure returns (uint);
-		function factory() external view returns (address);
-		function token0() external view returns (address);
-		function token1() external view returns (address);
-		function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-		function price0CumulativeLast() external view returns (uint);
-		function price1CumulativeLast() external view returns (uint);
-		function kLast() external view returns (uint);
-
-		function mint(address to) external returns (uint liquidity);
-		function burn(address to) external returns (uint amount0, uint amount1);
-		function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-		function skim(address to) external;
-		function sync() external;
-
-		function initialize(address, address) external;
-}
-
-interface IPancakeSwapRouter{
-		function factory() external pure returns (address);
-		function WETH() external pure returns (address);
-
-		function addLiquidity(
-				address tokenA,
-				address tokenB,
-				uint amountADesired,
-				uint amountBDesired,
-				uint amountAMin,
-				uint amountBMin,
-				address to,
-				uint deadline
-		) external returns (uint amountA, uint amountB, uint liquidity);
-		function addLiquidityETH(
-				address token,
-				uint amountTokenDesired,
-				uint amountTokenMin,
-				uint amountETHMin,
-				address to,
-				uint deadline
-		) external payable returns (uint amountToken, uint amountETH, uint liquidity);
-		function removeLiquidity(
-				address tokenA,
-				address tokenB,
-				uint liquidity,
-				uint amountAMin,
-				uint amountBMin,
-				address to,
-				uint deadline
-		) external returns (uint amountA, uint amountB);
-		function removeLiquidityETH(
-				address token,
-				uint liquidity,
-				uint amountTokenMin,
-				uint amountETHMin,
-				address to,
-				uint deadline
-		) external returns (uint amountToken, uint amountETH);
-		function removeLiquidityWithPermit(
-				address tokenA,
-				address tokenB,
-				uint liquidity,
-				uint amountAMin,
-				uint amountBMin,
-				address to,
-				uint deadline,
-				bool approveMax, uint8 v, bytes32 r, bytes32 s
-		) external returns (uint amountA, uint amountB);
-		function removeLiquidityETHWithPermit(
-				address token,
-				uint liquidity,
-				uint amountTokenMin,
-				uint amountETHMin,
-				address to,
-				uint deadline,
-				bool approveMax, uint8 v, bytes32 r, bytes32 s
-		) external returns (uint amountToken, uint amountETH);
-		function swapExactTokensForTokens(
-				uint amountIn,
-				uint amountOutMin,
-				address[] calldata path,
-				address to,
-				uint deadline
-		) external returns (uint[] memory amounts);
-		function swapTokensForExactTokens(
-				uint amountOut,
-				uint amountInMax,
-				address[] calldata path,
-				address to,
-				uint deadline
-		) external returns (uint[] memory amounts);
-		function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-				external
-				payable
-				returns (uint[] memory amounts);
-		function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-				external
-				returns (uint[] memory amounts);
-		function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-				external
-				returns (uint[] memory amounts);
-		function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-				external
-				payable
-				returns (uint[] memory amounts);
-
-		function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
-		function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
-		function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
-		function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
-		function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
-		function removeLiquidityETHSupportingFeeOnTransferTokens(
-			address token,
-			uint liquidity,
-			uint amountTokenMin,
-			uint amountETHMin,
-			address to,
-			uint deadline
-		) external returns (uint amountETH);
-		function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-			address token,
-			uint liquidity,
-			uint amountTokenMin,
-			uint amountETHMin,
-			address to,
-			uint deadline,
-			bool approveMax, uint8 v, bytes32 r, bytes32 s
-		) external returns (uint amountETH);
-	
-		function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-			uint amountIn,
-			uint amountOutMin,
-			address[] calldata path,
-			address to,
-			uint deadline
-		) external;
-		function swapExactETHForTokensSupportingFeeOnTransferTokens(
-			uint amountOutMin,
-			address[] calldata path,
-			address to,
-			uint deadline
-		) external payable;
-		function swapExactTokensForETHSupportingFeeOnTransferTokens(
-			uint amountIn,
-			uint amountOutMin,
-			address[] calldata path,
-			address to,
-			uint deadline
-		) external;
-}
-
-interface IPancakeSwapFactory {
-		event PairCreated(address indexed token0, address indexed token1, address pair, uint);
-
-		function feeTo() external view returns (address);
-		function feeToSetter() external view returns (address);
-
-		function getPair(address tokenA, address tokenB) external view returns (address pair);
-		function allPairs(uint) external view returns (address pair);
-		function allPairsLength() external view returns (uint);
-
-		function createPair(address tokenA, address tokenB) external returns (address pair);
-
-		function setFeeTo(address) external;
-		function setFeeToSetter(address) external;
+interface IDEXFactory {
+    function createPair(address tokenA, address tokenB)
+    external
+    returns (address pair);
 }
 
 contract Ownable {
@@ -342,12 +256,8 @@ contract Ownable {
     }
 
     modifier onlyOwner() {
-        require(isOwner());
+        require(msg.sender == _owner, "Not owner");
         _;
-    }
-
-    function isOwner() public view returns (bool) {
-        return msg.sender == _owner;
     }
 
     function renounceOwnership() public onlyOwner {
@@ -365,438 +275,426 @@ contract Ownable {
         _owner = newOwner;
     }
 }
+contract WhitelistedRole is Ownable {
+    using Roles for Roles.Role;
 
-abstract contract ERC20Detailed is IERC20 {
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    event WhitelistedAdded(address indexed account);
+    event WhitelistedRemoved(address indexed account);
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) {
-        _name = name_;
-        _symbol = symbol_;
-        _decimals = decimals_;
-    }
+    Roles.Role private _whitelisteds;
 
-    function name() public view returns (string memory) {
-        return _name;
-    }
-
-    function symbol() public view returns (string memory) {
-        return _symbol;
-    }
-
-    function decimals() public view returns (uint8) {
-        return _decimals;
-    }
-}
-
-contract Booba is ERC20Detailed, Ownable {
-
-    using SafeMath for uint256;
-    using SafeMathInt for int256;
-
-    event LogRebase(uint256 indexed epoch, uint256 totalSupply);
-
-    string public _name = "Booba";
-    string public _symbol = "BOOBA";
-    uint8 public _decimals = 18;
-
-    IPancakeSwapPair public pairContract;
-    mapping(address => bool) _isFeeExempt;
-
-    modifier validRecipient(address to) {
-        require(to != address(0x0));
+    modifier onlyWhitelisted() {
+        require(isWhitelisted(msg.sender), "WhitelistedRole: caller does not have the Whitelisted role");
         _;
     }
 
-    uint256 public constant DECIMALS = 18;
-    uint256 public constant MAX_UINT256 = ~uint256(0);
-    uint8 public constant RATE_DECIMALS = 18;
+    function isWhitelisted(address account) public view returns (bool) {
+        return _whitelisteds.has(account);
+    }
 
-    uint256 private constant INITIAL_FRAGMENTS_SUPPLY =
-        690000000000000000000;
+    function addWhitelisted(address account) public onlyOwner {
+        _addWhitelisted(account);
+    }
 
-    uint256 public liquidityFee = 690;
-    uint256 public treasuryFee = 69;
-    uint256 public boobaInsuranceFundFee = 69;
-    uint256 public sellFee = 69;
-    uint256 public firePitFee = 690;
-    uint256 public totalFee =
-        liquidityFee.add(treasuryFee).add(boobaInsuranceFundFee).add(
-            firePitFee
-        );
-    uint256 public feeDenominator = 10000;
+    function removeWhitelisted(address account) public onlyOwner {
+        _removeWhitelisted(account);
+    }
+
+    function renounceWhitelisted() public {
+        _removeWhitelisted(msg.sender);
+    }
+
+    function _addWhitelisted(address account) internal {
+        _whitelisteds.add(account);
+        emit WhitelistedAdded(account);
+    }
+
+    function _removeWhitelisted(address account) internal {
+        _whitelisteds.remove(account);
+        emit WhitelistedRemoved(account);
+    }
+}
+
+contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
+    using SafeMath for uint256;
+    using SafeMathInt for int256;
+
+    bool public initialDistributionFinished = false;
+    bool public swapEnabled = true;
+    bool public autoRebase = false;
+    bool public feesOnNormalTransfers = false;
+    bool public isLiquidityInBnb = true;
+
+    uint256 public rewardYield = 4252083;
+    uint256 public rewardYieldDenominator = 10000000000;
+    uint256 public maxSellTransactionAmount = 2500000 * 10 ** 18;
+
+    uint256 public rebaseFrequency = 1800;
+    uint256 public nextRebase = block.timestamp + 604800;
+
+    mapping(address => bool) _isFeeExempt;
+    address[] public _markerPairs;
+    mapping (address => bool) public automatedMarketMakerPairs;
+
+    uint256 public constant MAX_FEE_RATE = 20;
+    uint256 private constant MAX_REBASE_FREQUENCY = 1800;
+    uint256 private constant DECIMALS = 18;
+    uint256 private constant MAX_UINT256 = ~uint256(0);
+    uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 5 * 10**9 * 10**DECIMALS;
+    uint256 private constant TOTAL_GONS = MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
+    uint256 private constant MAX_SUPPLY = ~uint128(0);
 
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
-    address public autoLiquidityReceiver;
-    address public treasuryReceiver;
-    address public boobaInsuranceFundReceiver;
-    address public firePit;
-    address public pairAddress;
-    bool public swapEnabled = true;
-    IPancakeSwapRouter public router;
+    address public liquidityReceiver = 0x32585dCBc8b21E8Fb30a85d4097c496919B04126;
+    address public treasuryReceiver = 0x9E3B6a36EC336E341379e5346944D4f85b22dDfA;
+    address public riskFreeValueReceiver = 0xE92Eff45a050EfB9C641f37035E2ea97Ac1da27a;
+    address public busdToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+
+    IDEXRouter public router;
     address public pair;
-    bool inSwap = false;
+
+    uint256 public liquidityFee = 2;
+    uint256 public treasuryFee = 5;
+    uint256 public buyFeeRFV = 3;
+    uint256 public sellFeeTreasuryAdded = 5;
+    uint256 public sellFeeRFVAdded = 4;
+    uint256 public totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
+    uint256 public totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
+    uint256 public feeDenominator = 100;
+
+    uint256 targetLiquidity = 50;
+    uint256 targetLiquidityDenominator = 100;
+
+    bool inSwap;
+    uint256 public txfee = 1;
+
     modifier swapping() {
         inSwap = true;
         _;
         inSwap = false;
     }
 
- uint256 private constant TOTAL_GONS =
-        MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
+    struct user {
+        uint256 firstBuy;
+        uint256 lastTradeTime;
+        uint256 tradeAmount;
+    }
 
-    uint256 private constant MAX_SUPPLY = 69000000000000000000000000000000000000000000000000000000000000000000000 * 690000;
-  
+    uint256 public TwentyFourhours = 600;
 
-    bool public _autoRebase;
-    bool public _autoAddLiquidity;
-    uint256 public _initRebaseStartTime;
-    uint256 public _lastRebasedTime;
-    uint256 public _lastAddLiquidityTime;
-    uint256 public _totalSupply;
+    mapping(address => user) public tradeData;
+    
+    modifier validRecipient(address to) {
+        require(to != address(0x0));
+        _;
+    }
+
+    uint256 private _totalSupply;
     uint256 private _gonsPerFragment;
+    uint256 private gonSwapThreshold = (TOTAL_GONS * 10) / 10000;
 
     mapping(address => uint256) private _gonBalances;
     mapping(address => mapping(address => uint256)) private _allowedFragments;
-    mapping(address => bool) public blacklist;
 
-    constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) Ownable() {
-
-        router = IPancakeSwapRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E); 
-        pair = IPancakeSwapFactory(router.factory()).createPair(
-            router.WETH(),
-            address(this)
-        );
-      
-        autoLiquidityReceiver = 0x55dc4A7290Ad6ae97AA2c8ef9ff2CA44dFcB233f;
-        treasuryReceiver = 0xDde42996a258f03ADC8f8C508123743F622f4EE5; 
-        boobaInsuranceFundReceiver = 0xAB611Faded4aCD9cdd69bFE02420b7090acb3E62;
-        firePit = 0xc23a7929a3d9Ca948Cc5EeFC4594F0c12615B7f3;
+    constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) {
+        router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        pair = IDEXFactory(router.factory()).createPair(address(this), router.WETH());
+        address pairBusd = IDEXFactory(router.factory()).createPair(address(this), busdToken);
 
         _allowedFragments[address(this)][address(router)] = uint256(-1);
-        pairAddress = pair;
-        pairContract = IPancakeSwapPair(pair);
+        _allowedFragments[address(this)][pair] = uint256(-1);
+        _allowedFragments[address(this)][address(this)] = uint256(-1);
+        _allowedFragments[address(this)][pairBusd] = uint256(-1);
+
+        setAutomatedMarketMakerPair(pair, true);
+        setAutomatedMarketMakerPair(pairBusd, true);
 
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
-        _gonBalances[treasuryReceiver] = TOTAL_GONS;
+        _gonBalances[msg.sender] = TOTAL_GONS;
         _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
-        _initRebaseStartTime = block.timestamp;
-        _lastRebasedTime = block.timestamp;
-        _autoRebase = true;
-        _autoAddLiquidity = true;
+
         _isFeeExempt[treasuryReceiver] = true;
+        _isFeeExempt[riskFreeValueReceiver] = true;
         _isFeeExempt[address(this)] = true;
+        _isFeeExempt[msg.sender] = true;
 
-        _transferOwnership(treasuryReceiver);
-        emit Transfer(address(0x0), treasuryReceiver, _totalSupply);
+        IERC20(busdToken).approve(address(router), uint256(-1));
+        IERC20(busdToken).approve(address(pairBusd), uint256(-1));
+        IERC20(busdToken).approve(address(this), uint256(-1));
+
+        emit Transfer(address(0x0), msg.sender, _totalSupply);
     }
 
-    function rebase() internal {
-        
-        if ( inSwap ) return;
-        uint256 rebaseRate;
-        uint256 deltaTimeFromInit = block.timestamp - _initRebaseStartTime;
-        uint256 deltaTime = block.timestamp - _lastRebasedTime;
-        uint256 times = deltaTime.div(15 minutes);
-        uint256 epoch = times.mul(15);
+    receive() external payable {}
 
-        if (deltaTimeFromInit < (6900 days)) {
-            rebaseRate = 6900;
-} else if (deltaTimeFromInit >= (6900 days)) {
-            rebaseRate = 69;
-	}
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
 
-        for (uint256 i = 0; i < times; i++) {
-            _totalSupply = _totalSupply
-                .mul((10**RATE_DECIMALS).add(rebaseRate))
-                .div(10**RATE_DECIMALS);
+    function allowance(address owner_, address spender) external view override returns (uint256){
+        return _allowedFragments[owner_][spender];
+    }
+
+    function balanceOf(address who) public view override returns (uint256) {
+        return _gonBalances[who].div(_gonsPerFragment);
+    }
+
+    function checkFeeExempt(address _addr) external view returns (bool) {
+        return _isFeeExempt[_addr];
+    }
+
+    function checkSwapThreshold() external view returns (uint256) {
+        return gonSwapThreshold.div(_gonsPerFragment);
+    }
+
+    function shouldRebase() internal view returns (bool) {
+        return nextRebase <= block.timestamp;
+    }
+
+    function shouldTakeFee(address from, address to) internal view returns (bool) {
+        if(_isFeeExempt[from] || _isFeeExempt[to]){
+            return false;
+        }else if (feesOnNormalTransfers){
+            return true;
+        }else{
+            return (automatedMarketMakerPairs[from] || automatedMarketMakerPairs[to]);
         }
-
-        _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
-        _lastRebasedTime = _lastRebasedTime.add(times.mul(15 minutes));
-
-        pairContract.sync();
-
-        emit LogRebase(epoch, _totalSupply);
     }
 
-    function transfer(address to, uint256 value)
-        external
-        override
-        validRecipient(to)
-        returns (bool)
-    {
+    function shouldSwapBack() internal view returns (bool) {
+        return
+        !automatedMarketMakerPairs[msg.sender] &&
+        !inSwap &&
+        swapEnabled &&
+        totalBuyFee.add(totalSellFee) > 0 &&
+        _gonBalances[address(this)] >= gonSwapThreshold;
+    }
+
+    function getCirculatingSupply() public view returns (uint256) {
+        return (TOTAL_GONS.sub(_gonBalances[DEAD]).sub(_gonBalances[ZERO])).div(_gonsPerFragment);
+    }
+
+    function getLiquidityBacking(uint256 accuracy) public view returns (uint256){
+        uint256 liquidityBalance = 0;
+        for(uint i = 0; i < _markerPairs.length; i++){
+            liquidityBalance.add(balanceOf(_markerPairs[i]).div(10 ** 9));
+        }
+        return accuracy.mul(liquidityBalance.mul(2)).div(getCirculatingSupply().div(10 ** 9));
+    }
+
+    function isOverLiquified(uint256 target, uint256 accuracy) public view returns (bool){
+        return getLiquidityBacking(accuracy) > target;
+    }
+
+    function manualSync() public {
+        for(uint i = 0; i < _markerPairs.length; i++){
+            InterfaceLP(_markerPairs[i]).sync();
+        }
+    }
+
+    function transfer(address to, uint256 value) external override validRecipient(to) returns (bool){
         _transferFrom(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external override validRecipient(to) returns (bool) {
-        
-        if (_allowedFragments[from][msg.sender] != uint256(-1)) {
-            _allowedFragments[from][msg.sender] = _allowedFragments[from][
-                msg.sender
-            ].sub(value, "Insufficient Allowance");
-        }
-        _transferFrom(from, to, value);
-        return true;
-    }
-
-    function _basicTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal returns (bool) {
+    function _basicTransfer(address from, address to, uint256 amount) internal returns (bool) {
         uint256 gonAmount = amount.mul(_gonsPerFragment);
         _gonBalances[from] = _gonBalances[from].sub(gonAmount);
         _gonBalances[to] = _gonBalances[to].add(gonAmount);
+
+        emit Transfer(from, to, amount);
+
         return true;
     }
 
-    function _transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal returns (bool) {
+    function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
+        bool excludedAccount = _isFeeExempt[sender] || _isFeeExempt[recipient];
 
-        require(!blacklist[sender] && !blacklist[recipient], "in_blacklist");
+        require(initialDistributionFinished || excludedAccount, "Trading not started");
+
+        
+        if (
+            automatedMarketMakerPairs[recipient] &&
+            !excludedAccount
+        ) {
+            require(amount <= maxSellTransactionAmount, "Error amount");
+
+            uint blkTime = block.timestamp;
+          
+            uint256 onePercent = balanceOf(sender).mul(txfee).div(100); //Should use variable
+            require(amount <= onePercent, "ERR: Can't sell more than 1%");
+            
+            if( blkTime > tradeData[sender].lastTradeTime + TwentyFourhours) {
+                tradeData[sender].lastTradeTime = blkTime;
+                tradeData[sender].tradeAmount = amount;
+            }
+            else if( (blkTime < tradeData[sender].lastTradeTime + TwentyFourhours) && (( blkTime > tradeData[sender].lastTradeTime)) ){
+                require(tradeData[sender].tradeAmount + amount <= onePercent, "ERR: Can't sell more than 1% in One day");
+                tradeData[sender].tradeAmount = tradeData[sender].tradeAmount + amount;
+            }
+        }
 
         if (inSwap) {
             return _basicTransfer(sender, recipient, amount);
         }
-        if (shouldRebase()) {
-           rebase();
-        }
 
-        if (shouldAddLiquidity()) {
-            addLiquidity();
-        }
+        uint256 gonAmount = amount.mul(_gonsPerFragment);
 
         if (shouldSwapBack()) {
             swapBack();
         }
 
-        uint256 gonAmount = amount.mul(_gonsPerFragment);
         _gonBalances[sender] = _gonBalances[sender].sub(gonAmount);
-        uint256 gonAmountReceived = shouldTakeFee(sender, recipient)
-            ? takeFee(sender, recipient, gonAmount)
-            : gonAmount;
-        _gonBalances[recipient] = _gonBalances[recipient].add(
-            gonAmountReceived
-        );
 
+        uint256 gonAmountReceived = shouldTakeFee(sender, recipient) ? takeFee(sender, recipient, gonAmount) : gonAmount;
+        _gonBalances[recipient] = _gonBalances[recipient].add(gonAmountReceived);
 
         emit Transfer(
             sender,
             recipient,
             gonAmountReceived.div(_gonsPerFragment)
         );
+
+        if(shouldRebase() && autoRebase) {
+            _rebase();
+
+            if(!automatedMarketMakerPairs[sender] && !automatedMarketMakerPairs[recipient]){
+                manualSync();
+            }
+        }
+
         return true;
     }
 
-    function takeFee(
-        address sender,
-        address recipient,
-        uint256 gonAmount
-    ) internal  returns (uint256) {
-        uint256 _totalFee = totalFee;
-        uint256 _treasuryFee = treasuryFee;
-
-        if (recipient == pair) {
-            _totalFee = totalFee.add(sellFee);
-            _treasuryFee = treasuryFee.add(sellFee);
+    function transferFrom(address from, address to, uint256 value) external override validRecipient(to) returns (bool) {
+        if (_allowedFragments[from][msg.sender] != uint256(-1)) {
+            _allowedFragments[from][msg.sender] = _allowedFragments[from][
+            msg.sender
+            ].sub(value, "Insufficient Allowance");
         }
 
-        uint256 feeAmount = gonAmount.div(feeDenominator).mul(_totalFee);
-       
-        _gonBalances[firePit] = _gonBalances[firePit].add(
-            gonAmount.div(feeDenominator).mul(firePitFee)
-        );
-        _gonBalances[address(this)] = _gonBalances[address(this)].add(
-            gonAmount.div(feeDenominator).mul(_treasuryFee.add(boobaInsuranceFundFee))
-        );
-        _gonBalances[autoLiquidityReceiver] = _gonBalances[autoLiquidityReceiver].add(
-            gonAmount.div(feeDenominator).mul(liquidityFee)
-        );
-        
-        emit Transfer(sender, address(this), feeAmount.div(_gonsPerFragment));
-        return gonAmount.sub(feeAmount);
+        _transferFrom(from, to, value);
+        return true;
     }
 
-    function addLiquidity() internal swapping {
-        uint256 autoLiquidityAmount = _gonBalances[autoLiquidityReceiver].div(
-            _gonsPerFragment
-        );
-        _gonBalances[address(this)] = _gonBalances[address(this)].add(
-            _gonBalances[autoLiquidityReceiver]
-        );
-        _gonBalances[autoLiquidityReceiver] = 0;
-        uint256 amountToLiquify = autoLiquidityAmount.div(2);
-        uint256 amountToSwap = autoLiquidityAmount.sub(amountToLiquify);
+    function _swapAndLiquify(uint256 contractTokenBalance) private {
+        uint256 half = contractTokenBalance.div(2);
+        uint256 otherHalf = contractTokenBalance.sub(half);
 
-        if( amountToSwap == 0 ) {
-            return;
+        if(isLiquidityInBnb){
+            uint256 initialBalance = address(this).balance;
+
+            _swapTokensForBNB(half, address(this));
+
+            uint256 newBalance = address(this).balance.sub(initialBalance);
+
+            _addLiquidity(otherHalf, newBalance);
+
+            emit SwapAndLiquify(half, newBalance, otherHalf);
+        }else{
+            uint256 initialBalance = IERC20(busdToken).balanceOf(address(this));
+
+            _swapTokensForBusd(half, address(this));
+
+            uint256 newBalance = IERC20(busdToken).balanceOf(address(this)).sub(initialBalance);
+
+            _addLiquidityBusd(otherHalf, newBalance);
+
+            emit SwapAndLiquifyBusd(half, newBalance, otherHalf);
         }
+    }
+
+    function _addLiquidity(uint256 tokenAmount, uint256 bnbAmount) private {
+        router.addLiquidityETH{value: bnbAmount}(
+            address(this),
+            tokenAmount,
+            0,
+            0,
+            liquidityReceiver,
+            block.timestamp
+        );
+    }
+    function _addLiquidityBusd(uint256 tokenAmount, uint256 busdAmount) private {
+        router.addLiquidity(
+            address(this),
+            busdToken,
+            tokenAmount,
+            busdAmount,
+            0,
+            0,
+            liquidityReceiver,
+            block.timestamp
+        );
+    }
+
+    function _swapTokensForBNB(uint256 tokenAmount, address receiver) private {
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = router.WETH();
 
-        uint256 balanceBefore = address(this).balance;
-
-
         router.swapExactTokensForETHSupportingFeeOnTransferTokens(
-            amountToSwap,
+            tokenAmount,
             0,
             path,
-            address(this),
+            receiver,
             block.timestamp
         );
+    }
+    function _swapTokensForBusd(uint256 tokenAmount, address receiver) private {
+        address[] memory path = new address[](3);
+        path[0] = address(this);
+        path[1] = router.WETH();
+        path[2] = busdToken;
 
-        uint256 amountETHLiquidity = address(this).balance.sub(balanceBefore);
-
-        if (amountToLiquify > 0&&amountETHLiquidity > 0) {
-            router.addLiquidityETH{value: amountETHLiquidity}(
-                address(this),
-                amountToLiquify,
-                0,
-                0,
-                autoLiquidityReceiver,
-                block.timestamp
-            );
-        }
-        _lastAddLiquidityTime = block.timestamp;
+        router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            tokenAmount,
+            0,
+            path,
+            receiver,
+            block.timestamp
+        );
     }
 
     function swapBack() internal swapping {
+        uint256 realTotalFee = totalBuyFee.add(totalSellFee);
 
-        uint256 amountToSwap = _gonBalances[address(this)].div(_gonsPerFragment);
+        uint256 dynamicLiquidityFee = isOverLiquified(targetLiquidity, targetLiquidityDenominator) ? 0 : liquidityFee;
+        uint256 contractTokenBalance = _gonBalances[address(this)].div(_gonsPerFragment);
 
-        if( amountToSwap == 0) {
-            return;
+        uint256 amountToLiquify = contractTokenBalance.mul(dynamicLiquidityFee.mul(2)).div(realTotalFee);
+        uint256 amountToRFV = contractTokenBalance.mul(buyFeeRFV.mul(2).add(sellFeeRFVAdded)).div(realTotalFee);
+        uint256 amountToTreasury = contractTokenBalance.sub(amountToLiquify).sub(amountToRFV);
+
+        if(amountToLiquify > 0){
+            _swapAndLiquify(amountToLiquify);
         }
 
-        uint256 balanceBefore = address(this).balance;
-        address[] memory path = new address[](2);
-        path[0] = address(this);
-        path[1] = router.WETH();
-
-        
-        router.swapExactTokensForETHSupportingFeeOnTransferTokens(
-            amountToSwap,
-            0,
-            path,
-            address(this),
-            block.timestamp
-        );
-
-        uint256 amountETHToTreasuryAndSIF = address(this).balance.sub(
-            balanceBefore
-        );
-
-        (bool success, ) = payable(treasuryReceiver).call{
-            value: amountETHToTreasuryAndSIF.mul(treasuryFee).div(
-                treasuryFee.add(boobaInsuranceFundFee)
-            ),
-            gas: 30000
-        }("");
-        (success, ) = payable(boobaInsuranceFundReceiver).call{
-            value: amountETHToTreasuryAndSIF.mul(boobaInsuranceFundFee).div(
-                treasuryFee.add(boobaInsuranceFundFee)
-            ),
-            gas: 30000
-        }("");
-    }
-
-    function withdrawAllToTreasury() external swapping onlyOwner {
-
-        uint256 amountToSwap = _gonBalances[address(this)].div(_gonsPerFragment);
-        require( amountToSwap > 0,"There is no Booba token deposited in token contract");
-        address[] memory path = new address[](2);
-        path[0] = address(this);
-        path[1] = router.WETH();
-        router.swapExactTokensForETHSupportingFeeOnTransferTokens(
-            amountToSwap,
-            0,
-            path,
-            treasuryReceiver,
-            block.timestamp
-        );
-    }
-
-    function shouldTakeFee(address from, address to)
-        internal
-        view
-        returns (bool)
-    {
-        return 
-            (pair == from || pair == to) &&
-            !_isFeeExempt[from];
-    }
-
-    function shouldRebase() internal view returns (bool) {
-        return
-            _autoRebase &&
-            (_totalSupply < MAX_SUPPLY) &&
-            msg.sender != pair  &&
-            !inSwap &&
-            block.timestamp >= (_lastRebasedTime + 15 minutes);
-    }
-
-    function shouldAddLiquidity() internal view returns (bool) {
-        return
-            _autoAddLiquidity && 
-            !inSwap && 
-            msg.sender != pair &&
-            block.timestamp >= (_lastAddLiquidityTime + 2 days);
-    }
-
-    function shouldSwapBack() internal view returns (bool) {
-        return 
-            !inSwap &&
-            msg.sender != pair  ; 
-    }
-
-    function setAutoRebase(bool _flag) external onlyOwner {
-        if (_flag) {
-            _autoRebase = _flag;
-            _lastRebasedTime = block.timestamp;
-        } else {
-            _autoRebase = _flag;
+        if(amountToRFV > 0){
+            _swapTokensForBusd(amountToRFV, riskFreeValueReceiver);
         }
-    }
 
-    function setAutoAddLiquidity(bool _flag) external onlyOwner {
-        if(_flag) {
-            _autoAddLiquidity = _flag;
-            _lastAddLiquidityTime = block.timestamp;
-        } else {
-            _autoAddLiquidity = _flag;
+        if(amountToTreasury > 0){
+            _swapTokensForBNB(amountToTreasury, treasuryReceiver);
         }
+
+        emit SwapBack(contractTokenBalance, amountToLiquify, amountToRFV, amountToTreasury);
     }
 
-    function allowance(address owner_, address spender)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _allowedFragments[owner_][spender];
+    function takeFee(address sender, address recipient, uint256 gonAmount) internal returns (uint256){
+        uint256 _realFee = totalBuyFee;
+        if(automatedMarketMakerPairs[recipient]) _realFee = totalSellFee;
+
+        uint256 feeAmount = gonAmount.mul(_realFee).div(feeDenominator);
+
+        _gonBalances[address(this)] = _gonBalances[address(this)].add(feeAmount);
+        emit Transfer(sender, address(this), feeAmount.div(_gonsPerFragment));
+
+        return gonAmount.sub(feeAmount);
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        external
-        returns (bool)
-    {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool){
         uint256 oldValue = _allowedFragments[msg.sender][spender];
         if (subtractedValue >= oldValue) {
             _allowedFragments[msg.sender][spender] = 0;
@@ -813,12 +711,9 @@ contract Booba is ERC20Detailed, Ownable {
         return true;
     }
 
-    function increaseAllowance(address spender, uint256 addedValue)
-        external
-        returns (bool)
-    {
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool){
         _allowedFragments[msg.sender][spender] = _allowedFragments[msg.sender][
-            spender
+        spender
         ].add(addedValue);
         emit Approval(
             msg.sender,
@@ -828,87 +723,179 @@ contract Booba is ERC20Detailed, Ownable {
         return true;
     }
 
-    function approve(address spender, uint256 value)
-        external
-        override
-        returns (bool)
-    {
+    function approve(address spender, uint256 value) external override returns (bool){
         _allowedFragments[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
         return true;
     }
 
-    function checkFeeExempt(address _addr) external view returns (bool) {
-        return _isFeeExempt[_addr];
+    function _rebase() private {
+        if(!inSwap) {
+            uint256 circulatingSupply = getCirculatingSupply();
+            int256 supplyDelta = int256(circulatingSupply.mul(rewardYield).div(rewardYieldDenominator));
+
+            coreRebase(supplyDelta);
+        }
     }
 
-    function getCirculatingSupply() public view returns (uint256) {
-        return
-            (TOTAL_GONS.sub(_gonBalances[DEAD]).sub(_gonBalances[ZERO])).div(
-                _gonsPerFragment
-            );
-    }
+    function coreRebase(int256 supplyDelta) private returns (uint256) {
+        uint256 epoch = block.timestamp;
 
-    function isNotInSwap() external view returns (bool) {
-        return !inSwap;
-    }
+        if (supplyDelta == 0) {
+            emit LogRebase(epoch, _totalSupply);
+            return _totalSupply;
+        }
 
-    function manualSync() external {
-        IPancakeSwapPair(pair).sync();
-    }
+        if (supplyDelta < 0) {
+            _totalSupply = _totalSupply.sub(uint256(-supplyDelta));
+        } else {
+            _totalSupply = _totalSupply.add(uint256(supplyDelta));
+        }
 
-    function setFeeReceivers(
-        address _autoLiquidityReceiver,
-        address _treasuryReceiver,
-        address _boobaInsuranceFundReceiver,
-        address _firePit
-    ) external onlyOwner {
-        autoLiquidityReceiver = _autoLiquidityReceiver;
-        treasuryReceiver = _treasuryReceiver;
-        boobaInsuranceFundReceiver = _boobaInsuranceFundReceiver;
-        firePit = _firePit;
-    }
+        if (_totalSupply > MAX_SUPPLY) {
+            _totalSupply = MAX_SUPPLY;
+        }
 
-    function getLiquidityBacking(uint256 accuracy)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 liquidityBalance = _gonBalances[pair].div(_gonsPerFragment);
-        return
-            accuracy.mul(liquidityBalance.mul(2)).div(getCirculatingSupply());
-    }
+        _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
 
-    function setWhitelist(address _addr) external onlyOwner {
-        _isFeeExempt[_addr] = true;
-    }
+        nextRebase = epoch + rebaseFrequency;
 
-    function setBotBlacklist(address _botAddress, bool _flag) external onlyOwner {
-        require(isContract(_botAddress), "only contract address, not allowed exteranlly owned account");
-        blacklist[_botAddress] = _flag;    
-    }
-    
-    function setPairAddress(address _pairAddress) public onlyOwner {
-        pairAddress = _pairAddress;
-    }
-
-    function setLP(address _address) external onlyOwner {
-        pairContract = IPancakeSwapPair(_address);
-    }
-    
-    function totalSupply() external view override returns (uint256) {
+        emit LogRebase(epoch, _totalSupply);
         return _totalSupply;
     }
-   
-    function balanceOf(address who) external view override returns (uint256) {
-        return _gonBalances[who].div(_gonsPerFragment);
+
+    function manualRebase() external onlyWhitelisted{
+        require(!inSwap, "Try again");
+        require(nextRebase <= block.timestamp, "Not in time");
+
+        uint256 circulatingSupply = getCirculatingSupply();
+        int256 supplyDelta = int256(circulatingSupply.mul(rewardYield).div(rewardYieldDenominator));
+
+        coreRebase(supplyDelta);
+        manualSync();
     }
 
-    function isContract(address addr) internal view returns (bool) {
-        uint size;
-        assembly { size := extcodesize(addr) }
-        return size > 0;
+    function setAutomatedMarketMakerPair(address _pair, bool _value) public onlyOwner {
+        require(automatedMarketMakerPairs[_pair] != _value, "Value already set");
+
+        automatedMarketMakerPairs[_pair] = _value;
+
+        if(_value){
+            _markerPairs.push(_pair);
+        }else{
+            require(_markerPairs.length > 1, "Required 1 pair");
+            for (uint256 i = 0; i < _markerPairs.length; i++) {
+                if (_markerPairs[i] == _pair) {
+                    _markerPairs[i] = _markerPairs[_markerPairs.length - 1];
+                    _markerPairs.pop();
+                    break;
+                }
+            }
+        }
+
+        emit SetAutomatedMarketMakerPair(_pair, _value);
     }
 
-    receive() external payable {}
+    function setInitialDistributionFinished(bool _value) external onlyOwner {
+        require(initialDistributionFinished != _value, "Not changed");
+        initialDistributionFinished = _value;
+    }
+
+    function setFeeExempt(address _addr, bool _value) external onlyOwner {
+        require(_isFeeExempt[_addr] != _value, "Not changed");
+        _isFeeExempt[_addr] = _value;
+    }
+
+    function setTxFee(uint _addr) external onlyOwner {
+        txfee = _addr;
+    }
+
+    function setTwentyFourhours(uint256 _time) external onlyOwner {
+        TwentyFourhours = _time;
+    }
+
+    function setTargetLiquidity(uint256 target, uint256 accuracy) external onlyOwner {
+        targetLiquidity = target;
+        targetLiquidityDenominator = accuracy;
+    }
+
+    function setSwapBackSettings(bool _enabled, uint256 _num, uint256 _denom) external onlyOwner {
+        swapEnabled = _enabled;
+        gonSwapThreshold = TOTAL_GONS.div(_denom).mul(_num);
+    }
+
+    function setFeeReceivers(address _liquidityReceiver, address _treasuryReceiver, address _riskFreeValueReceiver) external onlyOwner {
+        liquidityReceiver = _liquidityReceiver;
+        treasuryReceiver = _treasuryReceiver;
+        riskFreeValueReceiver = _riskFreeValueReceiver;
+    }
+
+    function setFees(uint256 _liquidityFee, uint256 _riskFreeValue, uint256 _treasuryFee, uint256 _sellFeeTreasuryAdded, uint256 _sellFeeRFVAdded, uint256 _feeDenominator) external onlyOwner {
+        require(
+            _liquidityFee <= MAX_FEE_RATE &&
+            _riskFreeValue <= MAX_FEE_RATE &&
+            _treasuryFee <= MAX_FEE_RATE &&
+            _sellFeeTreasuryAdded <= MAX_FEE_RATE &&
+            _sellFeeRFVAdded <= MAX_FEE_RATE,
+            "wrong"
+        );
+
+        liquidityFee = _liquidityFee;
+        buyFeeRFV = _riskFreeValue;
+        treasuryFee = _treasuryFee;
+        sellFeeTreasuryAdded = _sellFeeTreasuryAdded;
+        sellFeeRFVAdded = _sellFeeRFVAdded;
+        totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
+        totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
+        feeDenominator = _feeDenominator;
+        require(totalBuyFee < feeDenominator / 4);
+    }
+
+    function clearStuckBalance(address _receiver) external onlyOwner {
+        uint256 balance = address(this).balance;
+        payable(_receiver).transfer(balance);
+    }
+
+    function rescueToken(address tokenAddress, uint256 tokens) external onlyOwner returns (bool success){
+        return ERC20Detailed(tokenAddress).transfer(msg.sender, tokens);
+    }
+
+    function setAutoRebase(bool _autoRebase) external onlyOwner {
+        require(autoRebase != _autoRebase, "Not changed");
+        autoRebase = _autoRebase;
+    }
+
+    function setRebaseFrequency(uint256 _rebaseFrequency) external onlyOwner {
+        require(_rebaseFrequency <= MAX_REBASE_FREQUENCY, "Too high");
+        rebaseFrequency = _rebaseFrequency;
+    }
+
+    function setRewardYield(uint256 _rewardYield, uint256 _rewardYieldDenominator) external onlyOwner {
+        rewardYield = _rewardYield;
+        rewardYieldDenominator = _rewardYieldDenominator;
+    }
+
+    function setFeesOnNormalTransfers(bool _enabled) external onlyOwner {
+        require(feesOnNormalTransfers != _enabled, "Not changed");
+        feesOnNormalTransfers = _enabled;
+    }
+
+    function setIsLiquidityInBnb(bool _value) external onlyOwner {
+        require(isLiquidityInBnb != _value, "Not changed");
+        isLiquidityInBnb = _value;
+    }
+
+    function setNextRebase(uint256 _nextRebase) external onlyOwner {
+        nextRebase = _nextRebase;
+    }
+
+    function setMaxSellTransaction(uint256 _maxTxn) external onlyOwner {
+        maxSellTransactionAmount = _maxTxn;
+    }
+
+    event SwapBack(uint256 contractTokenBalance,uint256 amountToLiquify,uint256 amountToRFV,uint256 amountToTreasury);
+    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquifyBusd(uint256 tokensSwapped, uint256 busdReceived, uint256 tokensIntoLiqudity);
+    event LogRebase(uint256 indexed epoch, uint256 totalSupply);
+    event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
 }
