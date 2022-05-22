@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at BscScan.com on 2022-04-30
+ *Submitted for verification at BscScan.com
 */
 
 // SPDX-License-Identifier: AYAYA
@@ -325,22 +325,22 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     bool public feesOnNormalTransfers = false;
     bool public isLiquidityInBnb = true;
 
-    uint256 public rewardYield = 4252083;
-    uint256 public rewardYieldDenominator = 10000000000;
-    uint256 public maxSellTransactionAmount = 2500000 * 10 ** 18;
+    uint256 public rewardYield = 6969696;
+    uint256 public rewardYieldDenominator = 6969696969;
+    uint256 public maxSellTransactionAmount = 6969696 * 10 ** 18;
 
-    uint256 public rebaseFrequency = 1800;
+    uint256 public rebaseFrequency = 1069;
     uint256 public nextRebase = block.timestamp + 604800;
 
     mapping(address => bool) _isFeeExempt;
     address[] public _markerPairs;
     mapping (address => bool) public automatedMarketMakerPairs;
 
-    uint256 public constant MAX_FEE_RATE = 20;
-    uint256 private constant MAX_REBASE_FREQUENCY = 1800;
+    uint256 public constant MAX_FEE_RATE = 6.9;
+    uint256 private constant MAX_REBASE_FREQUENCY = 1069;
     uint256 private constant DECIMALS = 18;
     uint256 private constant MAX_UINT256 = ~uint256(0);
-    uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 5 * 10**9 * 10**DECIMALS;
+    uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 69 * 10**9 * 10**DECIMALS;
     uint256 private constant TOTAL_GONS = MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
     uint256 private constant MAX_SUPPLY = ~uint128(0);
 
@@ -355,17 +355,15 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     IDEXRouter public router;
     address public pair;
 
-    uint256 public liquidityFee = 2;
-    uint256 public treasuryFee = 5;
-    uint256 public buyFeeRFV = 3;
-    uint256 public sellFeeTreasuryAdded = 5;
-    uint256 public sellFeeRFVAdded = 4;
+    uint256 public liquidityFee = 69;
+    uint256 public treasuryFee = 69;
+    uint256 public buyFeeRFV = 69;
     uint256 public totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
     uint256 public totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
-    uint256 public feeDenominator = 100;
+    uint256 public feeDenominator = 1000;
 
-    uint256 targetLiquidity = 50;
-    uint256 targetLiquidityDenominator = 100;
+    uint256 targetLiquidity = 690;
+    uint256 targetLiquidityDenominator = 1000;
 
     bool inSwap;
     uint256 public txfee = 1;
@@ -399,7 +397,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     mapping(address => mapping(address => uint256)) private _allowedFragments;
 
     constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) {
-        router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        router = IDEXRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
         pair = IDEXFactory(router.factory()).createPair(address(this), router.WETH());
         address pairBusd = IDEXFactory(router.factory()).createPair(address(this), busdToken);
 
