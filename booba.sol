@@ -336,7 +336,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     address[] public _markerPairs;
     mapping (address => bool) public automatedMarketMakerPairs;
 
-    uint256 public constant MAX_FEE_RATE = 6.9;
+    uint256 public constant MAX_FEE_RATE = 69;
     uint256 private constant MAX_REBASE_FREQUENCY = 1069;
     uint256 private constant DECIMALS = 18;
     uint256 private constant MAX_UINT256 = ~uint256(0);
@@ -355,14 +355,14 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     IDEXRouter public router;
     address public pair;
 
- uint256 public liquidityFee = 6.9;
-    uint256 public treasuryFee = 6.9;
-    uint256 public buyFeeRFV = 6.9;
-    uint256 public sellFeeTreasuryAdded = 6.9;
-    uint256 public sellFeeRFVAdded = 6.9;
+ uint256 public liquidityFee = 69;
+    uint256 public treasuryFee = 69;
+    uint256 public buyFeeRFV = 69;
+    uint256 public sellFeeTreasuryAdded = 69;
+    uint256 public sellFeeRFVAdded = 69;
     uint256 public totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
     uint256 public totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
-    uint256 public feeDenominator = 100;
+    uint256 public feeDenominator = 1000;
 
     uint256 targetLiquidity = 690;
     uint256 targetLiquidityDenominator = 1000;
@@ -881,7 +881,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     }
 
     function setIsLiquidityInEth(bool _value) external onlyOwner {
-        require(isLiquidityInEth != _value, "Not changed");
+        require(isLiquidityIneth != _value, "Not changed");
         isLiquidityIneth = _value;
     }
 
