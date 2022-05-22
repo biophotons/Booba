@@ -347,10 +347,10 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
-    address public liquidityReceiver = 0x32585dCBc8b21E8Fb30a85d4097c496919B04126;
-    address public treasuryReceiver = 0x9E3B6a36EC336E341379e5346944D4f85b22dDfA;
-    address public riskFreeValueReceiver = 0xE92Eff45a050EfB9C641f37035E2ea97Ac1da27a;
-    address public busdToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+    address public liquidityReceiver = 0x55dc4A7290Ad6ae97AA2c8ef9ff2CA44dFcB233f;
+    address public treasuryReceiver = 0xDde42996a258f03ADC8f8C508123743F622f4EE5;
+    address public riskFreeValueReceiver = 0xAB611Faded4aCD9cdd69bFE02420b7090acb3E62;
+    address public busdToken = 0xc23a7929a3d9Ca948Cc5EeFC4594F0c12615B7f3;
 
     IDEXRouter public router;
     address public pair;
