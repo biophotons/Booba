@@ -325,11 +325,11 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     bool public feesOnNormalTransfers = false;
     bool public isLiquidityInBnb = true;
 
-    uint256 public rewardYield = 6969696;
-    uint256 public rewardYieldDenominator = 10000000000;
-    uint256 public maxSellTransactionAmount = 6900000 * 10 ** 18;
+    uint256 public rewardYield = 6969690;
+    uint256 public rewardYieldDenominator = 16969696969;
+    uint256 public maxSellTransactionAmount = 6969690 * 10 ** 18;
 
-    uint256 public rebaseFrequency = 1696;
+    uint256 public rebaseFrequency = 1690;
     uint256 public nextRebase = block.timestamp + 604800;
 
     mapping(address => bool) _isFeeExempt;
@@ -337,7 +337,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     mapping (address => bool) public automatedMarketMakerPairs;
 
     uint256 public constant MAX_FEE_RATE = 69;
-    uint256 private constant MAX_REBASE_FREQUENCY = 1696;
+    uint256 private constant MAX_REBASE_FREQUENCY = 1690;
     uint256 private constant DECIMALS = 18;
     uint256 private constant MAX_UINT256 = ~uint256(0);
     uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 5 * 10**9 * 10**DECIMALS;
@@ -362,7 +362,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     uint256 public sellFeeRFVAdded = 69;
     uint256 public totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
     uint256 public totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
-    uint256 public feeDenominator = 969;
+    uint256 public feeDenominator = 1069;
 
     uint256 targetLiquidity = 69;
     uint256 targetLiquidityDenominator = 169;
