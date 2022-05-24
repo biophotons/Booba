@@ -1,8 +1,8 @@
 /**
- *Submitted for verification at BscScan.com
+ *Submitted for verification at BscScan.com on 2022-05-24
 */
 
-// SPDX-License-Identifier: AYAYA
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.7.6;
 
@@ -323,13 +323,13 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     bool public swapEnabled = true;
     bool public autoRebase = false;
     bool public feesOnNormalTransfers = false;
-    bool public isLiquidityIneth = true;
+    bool public isLiquidityInBnb = true;
 
     uint256 public rewardYield = 6969696;
-    uint256 public rewardYieldDenominator = 6969696969;
-    uint256 public maxSellTransactionAmount = 6969696 * 10 ** 18;
+    uint256 public rewardYieldDenominator = 10000000000;
+    uint256 public maxSellTransactionAmount = 6900000 * 10 ** 18;
 
-    uint256 public rebaseFrequency = 1069;
+    uint256 public rebaseFrequency = 1696;
     uint256 public nextRebase = block.timestamp + 604800;
 
     mapping(address => bool) _isFeeExempt;
@@ -337,10 +337,10 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     mapping (address => bool) public automatedMarketMakerPairs;
 
     uint256 public constant MAX_FEE_RATE = 69;
-    uint256 private constant MAX_REBASE_FREQUENCY = 1069;
+    uint256 private constant MAX_REBASE_FREQUENCY = 1696;
     uint256 private constant DECIMALS = 18;
     uint256 private constant MAX_UINT256 = ~uint256(0);
-    uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 69 * 10**9 * 10**DECIMALS;
+    uint256 private constant INITIAL_FRAGMENTS_SUPPLY = 5 * 10**9 * 10**DECIMALS;
     uint256 private constant TOTAL_GONS = MAX_UINT256 - (MAX_UINT256 % INITIAL_FRAGMENTS_SUPPLY);
     uint256 private constant MAX_SUPPLY = ~uint128(0);
 
@@ -350,22 +350,22 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     address public liquidityReceiver = 0x55dc4A7290Ad6ae97AA2c8ef9ff2CA44dFcB233f;
     address public treasuryReceiver = 0xDde42996a258f03ADC8f8C508123743F622f4EE5;
     address public riskFreeValueReceiver = 0xAB611Faded4aCD9cdd69bFE02420b7090acb3E62;
-    address public usdToken = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address public busdToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
     IDEXRouter public router;
     address public pair;
 
- uint256 public liquidityFee = 69;
+    uint256 public liquidityFee = 69;
     uint256 public treasuryFee = 69;
     uint256 public buyFeeRFV = 69;
     uint256 public sellFeeTreasuryAdded = 69;
     uint256 public sellFeeRFVAdded = 69;
     uint256 public totalBuyFee = liquidityFee.add(treasuryFee).add(buyFeeRFV);
     uint256 public totalSellFee = totalBuyFee.add(sellFeeTreasuryAdded).add(sellFeeRFVAdded);
-    uint256 public feeDenominator = 1000;
+    uint256 public feeDenominator = 969;
 
-    uint256 targetLiquidity = 690;
-    uint256 targetLiquidityDenominator = 1000;
+    uint256 targetLiquidity = 69;
+    uint256 targetLiquidityDenominator = 169;
 
     bool inSwap;
     uint256 public txfee = 1;
@@ -399,17 +399,17 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     mapping(address => mapping(address => uint256)) private _allowedFragments;
 
     constructor() ERC20Detailed("Booba", "BOOBA", uint8(DECIMALS)) {
-        router = IDEXRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+        router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         pair = IDEXFactory(router.factory()).createPair(address(this), router.WETH());
-        address pairusd = IDEXFactory(router.factory()).createPair(address(this), usdToken);
+        address pairBusd = IDEXFactory(router.factory()).createPair(address(this), busdToken);
 
         _allowedFragments[address(this)][address(router)] = uint256(-1);
         _allowedFragments[address(this)][pair] = uint256(-1);
         _allowedFragments[address(this)][address(this)] = uint256(-1);
-        _allowedFragments[address(this)][pairusd] = uint256(-1);
+        _allowedFragments[address(this)][pairBusd] = uint256(-1);
 
         setAutomatedMarketMakerPair(pair, true);
-        setAutomatedMarketMakerPair(pairusd, true);
+        setAutomatedMarketMakerPair(pairBusd, true);
 
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
         _gonBalances[msg.sender] = TOTAL_GONS;
@@ -420,9 +420,9 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         _isFeeExempt[address(this)] = true;
         _isFeeExempt[msg.sender] = true;
 
-        IERC20(usdToken).approve(address(router), uint256(-1));
-        IERC20(usdToken).approve(address(pairusd), uint256(-1));
-        IERC20(usdToken).approve(address(this), uint256(-1));
+        IERC20(busdToken).approve(address(router), uint256(-1));
+        IERC20(busdToken).approve(address(pairBusd), uint256(-1));
+        IERC20(busdToken).approve(address(this), uint256(-1));
 
         emit Transfer(address(0x0), msg.sender, _totalSupply);
     }
@@ -583,10 +583,10 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         uint256 half = contractTokenBalance.div(2);
         uint256 otherHalf = contractTokenBalance.sub(half);
 
-        if(isLiquidityIneth){
+        if(isLiquidityInBnb){
             uint256 initialBalance = address(this).balance;
 
-            _swapTokensForETH(half, address(this));
+            _swapTokensForBNB(half, address(this));
 
             uint256 newBalance = address(this).balance.sub(initialBalance);
 
@@ -594,20 +594,20 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
 
             emit SwapAndLiquify(half, newBalance, otherHalf);
         }else{
-            uint256 initialBalance = IERC20(usdToken).balanceOf(address(this));
+            uint256 initialBalance = IERC20(busdToken).balanceOf(address(this));
 
-            _swapTokensForusd(half, address(this));
+            _swapTokensForBusd(half, address(this));
 
-            uint256 newBalance = IERC20(usdToken).balanceOf(address(this)).sub(initialBalance);
+            uint256 newBalance = IERC20(busdToken).balanceOf(address(this)).sub(initialBalance);
 
-            _addLiquidityusd(otherHalf, newBalance);
+            _addLiquidityBusd(otherHalf, newBalance);
 
-            emit SwapAndLiquifyusd(half, newBalance, otherHalf);
+            emit SwapAndLiquifyBusd(half, newBalance, otherHalf);
         }
     }
 
-    function _addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
-        router.addLiquidityETH{value: ethAmount}(
+    function _addLiquidity(uint256 tokenAmount, uint256 bnbAmount) private {
+        router.addLiquidityETH{value: bnbAmount}(
             address(this),
             tokenAmount,
             0,
@@ -616,12 +616,12 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
             block.timestamp
         );
     }
-    function _addLiquidityusd(uint256 tokenAmount, uint256 usdAmount) private {
+    function _addLiquidityBusd(uint256 tokenAmount, uint256 busdAmount) private {
         router.addLiquidity(
             address(this),
-            usdToken,
+            busdToken,
             tokenAmount,
-            usdAmount,
+            busdAmount,
             0,
             0,
             liquidityReceiver,
@@ -629,7 +629,7 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         );
     }
 
-    function _swapTokensForETH(uint256 tokenAmount, address receiver) private {
+    function _swapTokensForBNB(uint256 tokenAmount, address receiver) private {
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = router.WETH();
@@ -642,11 +642,11 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
             block.timestamp
         );
     }
-    function _swapTokensForusd(uint256 tokenAmount, address receiver) private {
+    function _swapTokensForBusd(uint256 tokenAmount, address receiver) private {
         address[] memory path = new address[](3);
         path[0] = address(this);
         path[1] = router.WETH();
-        path[2] = usdToken;
+        path[2] = busdToken;
 
         router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             tokenAmount,
@@ -672,11 +672,11 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         }
 
         if(amountToRFV > 0){
-            _swapTokensForusd(amountToRFV, riskFreeValueReceiver);
+            _swapTokensForBusd(amountToRFV, riskFreeValueReceiver);
         }
 
         if(amountToTreasury > 0){
-            _swapTokensForETH(amountToTreasury, treasuryReceiver);
+            _swapTokensForBNB(amountToTreasury, treasuryReceiver);
         }
 
         emit SwapBack(contractTokenBalance, amountToLiquify, amountToRFV, amountToTreasury);
@@ -880,9 +880,9 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
         feesOnNormalTransfers = _enabled;
     }
 
-    function setIsLiquidityInEth(bool _value) external onlyOwner {
-        require(isLiquidityIneth != _value, "Not changed");
-        isLiquidityIneth = _value;
+    function setIsLiquidityInBnb(bool _value) external onlyOwner {
+        require(isLiquidityInBnb != _value, "Not changed");
+        isLiquidityInBnb = _value;
     }
 
     function setNextRebase(uint256 _nextRebase) external onlyOwner {
@@ -894,8 +894,8 @@ contract DTOKEN is ERC20Detailed, Ownable, WhitelistedRole {
     }
 
     event SwapBack(uint256 contractTokenBalance,uint256 amountToLiquify,uint256 amountToRFV,uint256 amountToTreasury);
-    event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity);
-    event SwapAndLiquifyusd(uint256 tokensSwapped, uint256 usdReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiqudity);
+    event SwapAndLiquifyBusd(uint256 tokensSwapped, uint256 busdReceived, uint256 tokensIntoLiqudity);
     event LogRebase(uint256 indexed epoch, uint256 totalSupply);
     event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
 }
